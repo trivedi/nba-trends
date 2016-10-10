@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <script src="http://d3js.org/d3.v3.min.js"></script>
+    <title>Interactive Bar Graph Demo</title>
+  </head>
+
+
+  <style>
+ 
+	 #chart {
+		  width: 400px;
+		  height: 500px;
+		  margin: auto;
+	 }
+
+    .bars { /* initial state of the bars */
+      fill: blue; /* color of bars */
+      -webkit-transition: 0.5s; /* this enables animated transition: what to change "fill" and how long "0.5s"  */
+    }
+
+    .bars:hover { /* hover state of bars: style change when mouse cursor is over the bars */
+      fill: orange;
+      -webkit-transition: 0.5s; /* we need this again so that transition occurs in both directions */
+    }
+
+   .tooltip { /* CSS styles of tooltip that will be created in line 79 */
+      width: 150px;
+      height: 20px;
+      background: yellow;
+      position: relative;
+      text-align: center;
+    }
+ 
+  </style>
+
+  <body>
+
+	 <div id="chart"></div>
+
+  </body>
+ 
+  <script>
+
+  d3.csv("{{ url_for('static', filename='data/candidates.csv') }}", function(error, data) {
+
+  var	parseDate = d3.time.format("%Y-%m-%d").parse;
+
+  data.forEach(function(d) {
+        d.date = parseDate(d.date);
+        d.clinton = +d.clinton;
+  });
+
+  var padding = {top: 20, right: 20, bottom: 20, left: 20},
+        w = 400 - padding.left - padding.right,
+        h = 500 - padding.top - padding.bottom;
+
+  var yScale = d3.scale.ordinal()
+		    .domain(data.map(function(d) { return d.date; }))
+		    .rangeRoundBands([h, 0], .05);
+
+  var xScale = d3.scale.linear()
+		    .domain([0, d3.max(data, function(d) { return d.clinton; })])
+		    .range([0, w]);
+
+  var svg = d3.select("#chart")
+	      .append("svg")
+        .attr("width", w + padding.left + padding.right)
+        .attr("height", h + padding.top + padding.bottom)
+        .append("g")
+        .attr("transform", "translate(" + padding.left + "," + padding.top + ")");
+
+
+//------------------------------------//
+// Start of Interactive D3 Components
+
+  // D3 creating DIV (containers) of the tooltips
+  var div = d3.select("#chart")
+        .append("div") // adds DIV to the page
+        .attr("class", "tooltip") // assigns CSS class "tooltip" -- see line 28     
+        .style("opacity", 0); // begin state of tooltip : it needs to be hidden
+
+  svg.selectAll("bar") // Drawing the bars -- nothing new here until line 92
+        .data(data)
+        .enter().append("rect")
+        .attr("class", "bars")
+        .attr("x", function(d) { return w - xScale(d.clinton); })
+        .attr("height", yScale.rangeBand())
+        .attr("y", function(d) { return yScale(d.date); })
+        .attr("width", function(d) { return xScale(d.clinton); })
+        .on("mouseover", function(d) { // hover state events when mouse cursor enters a bar
+        
+        div.transition() // enables the tooltip to animate into the page
+          .duration(200) // duration of the transition animation in milliseconds
+          .style("opacity", 1); // end state of animation -- begin state can be found in line 82
+
+        div.html("Clinton: " + d.clinton) // text inside the tooltip
+          .style("left", w - xScale(d.clinton) + -140 + "px") // horizontal position of text
+          .style("top", yScale(d.date) + -480 + "px"); // vertical position of text
+
+        })
+        .on("mouseout", function(d) { // hover events when mouse cursor leaves the bar
+          div.transition()
+          .duration(500)
+          .style("opacity", 0);
+  });
+
+// End of Interactive D3 Components
+//---------------------------------//
+
+  });
+ 
+</script>
+</html>
