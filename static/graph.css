@@ -1,0 +1,91 @@
+body {
+    background-color: #093246;
+    font-family: "Open Sans", "Helvetica Neue", Helvetica, sans-serif;
+}
+
+p {
+    color: #96B7CC;
+    font-family: "Open Sans";
+}
+
+select {
+    margin: 20px;
+    margin-right: 60px;
+    padding: 5px 8px;
+    border: 1px solid #ccc;
+    box-shadow: none;
+    background-color: #E2DCDC;
+    background-image: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    border-radius: 3px;
+    overflow: hidden;
+    background-color: #fff;
+    background: #fff url("http://www.scottgood.com/jsg/blog.nsf/images/arrowdown.gif") no-repeat 90% 50%;
+}
+
+path { /* css styles for the lines on our graph */
+  stroke-width: 2;
+  fill: none;
+}
+ 
+.axis path, /* css styles for the axis */
+.axis line {
+    fill: none;
+    stroke: #96B7CC;
+    stroke-width: 1;
+}
+
+.axis text { /* css styles for the axis text */
+  font: 10px "Open Sans";
+  fill: #96B7CC;
+}
+
+.tick text {
+    font-size: 12px;
+}
+
+.tick line {
+    opacity: 0.15;
+}
+
+
+.container {
+    height: 900px;
+    width: 60%;
+    margin: 150px;
+    margin-top: 30px;
+    border-color: red;
+    border-width: 1px;
+    border-style: solid;
+}
+ 
+#chart {
+    width: 700px;
+    height: 500px;
+    margin: auto;
+}
+
+#graph-top {
+    height: 10%;
+    width: 100%;
+    border-color: yellow;
+    border-width: 1px;
+    border-style: solid;
+}
+
+#graph-title {
+    margin-top: 20px;
+    color: #96B7CC;
+    font-family: "Open Sans";
+    font-size: 1.5em;
+    height: 100%;
+}
+
+#title {
+    width: 70%;
+    color: #96B7CC;
+    font-family: "Open Sans";
+    font-size: 1.5em;
+}
