@@ -5,20 +5,106 @@
     <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
 </head>
 <body>
+
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script>
+
+var height = 500;
+var width = 500;
+var margin = {
+    left: 100,
+    right: 100,
+    top: 100,
+    bottom: 100
+};
+
+var xScale = d3.time.scale()
+          .range([0, width]);
+var yScale = d3.time.scale()
+          .range([height, 0]);
+
+var xAxis = d3.svg.axis()
+            .scale(x)
+            .orient("bottom");
+
+var yAxis = d3.svg.axis()
+            .scale(y)
+            .orient("left");
+
+var line = d3.svg.line() // determine (x, y) position on the graph
+            .x(function(d) { return xScale(d.date); })
+            .y(function(d) { return yScale(d.popularity); });
+
+var svg = d3.select("#graph").append("svg")
+            .attr("width", 200)
+            .attr("height", 200)
+            .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+
+
+// d3.csv(filename, function to transform each element (optional), function that does stuff with data)
+d3.csv("{{ url_for('static', filename='data/lebronjames.csv') }}", transformData, plotData);
+
+
+function transformData(elem) {
+    return {
+        "date" : d3.time.format("%Y-%m-%d").parse(elem.Week), // convert date to d3 parseable
+        "popularity" : +elem.Popularity // convert str to int
+    }
+}
+
+function plotData(error, data) {
+    if (error)
+        throw error;
+
+    data.forEach(function(elem) {
+        //console.log(elem);
+    });
+
+    x.domain(d3.extent(data, function(elem) { return elem.data; }));
+    y.domain(d3.extent(data, function(elem) { return elem.popularity; }));
+
+
+    // Create X axis
+    svg.append("g") // g means group so you can transform the entire group of elements
+        .attr("class", "x axis")
+        .attr("transform", "translate(0," + height + ")")
+        .call(xAxis);
+
+    // Create Y axis
+    svg.append("g")
+        .attr("class", "y axis")
+        .call(yAxis)
+        .append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("y", 6)
+        .attr("dy", ".7em")
+        .style("text-anchor", "end")
+        .text("Popularity");    // Y axis label
+
+    svg.append("path")
+        .datum(data)
+        .attr("class", "line") // .line
+        .attr("d", line);      
+
+}
+
+</script>
+
+
 <div class="container">
     <div id="title">
         <h1>How Much Does An NBA Player Affect His Team's Popularity?</h1>
     </div>
-    <div id="graph">
-        <div id="graph-top">
-            <select>
-                <option>LeBron James</option>
-                <option>Stephen Curry</option>
-                <option>Karl-Anthony Towns</option>
-                <option>James Harden</option>
-            </select>
-            <span id="graph-title">LeBron James of the Cleveland Cavaliers</span>
-        </div>
+    <div id="graph-top">
+        <select>
+            <option>LeBron James</option>
+            <option>Stephen Curry</option>
+            <option>Karl-Anthony Towns</option>
+            <option>James Harden</option>
+        </select>
+        <span id="graph-title">LeBron James of the Cleveland Cavaliers</span>
     </div>
     <p>The success of a basketball team is dependent on the chemistry of the five players on the court. However, often times, an individual player is rewarded or blamed for the performance of his team. Regardless of whether they’re directly responsible for the numbers a team puts up, perceptions drive sports. Let’s compare global popularity trends of various players and the teams they played for.</p>
     <p>Annotations are provided for milestones (e.g. draft, trade, major injury, major wins/losses, etc).</p>
