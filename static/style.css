@@ -35,13 +35,23 @@ select {
     border-style: solid;
 }
 
-#graph {
-    height: 70%;
-    width: 100%;
-    border-color: white;
-    border-width: 1px;
-    border-style: solid;
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
 }
+
+.x.axis path {
+  display: none;
+}
+
+.line {
+  fill: none;
+  stroke: yellow;
+  stroke-width: 1.5px;
+}
+
 
 #graph-top {
     height: 10%;

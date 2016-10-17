@@ -5,7 +5,7 @@
 <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='graph.css') }}">
 <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
 <script src="http://d3js.org/d3.v3.min.js"></script>
-<title>Line Graph Demo</title>
+<title>NBA Popularity Trends</title>
 </head>
 
 
@@ -32,6 +32,7 @@
         <p>Annotations are provided for milestones (e.g. draft, trade, major injury, major wins/losses, etc).</p>
         <p>The data used comes from Google Trends.</p>
     </div>
+    <div id="box"></div>
 </body>
  
 <script>
@@ -44,7 +45,8 @@ function transformData(d) {
         "date" : parseDate(d.date),
         "player" : +d.player,
         "team" : +d.team,
-        "annotation" : d.annotation
+        "playerAnnotation": d.playerAnnotation,
+        "teamAnnotation": d.teamAnnotation
     }
 }
 
@@ -52,20 +54,12 @@ function transformData(d) {
 d3.csv("{{ url_for('static', filename='data/lebronjames.csv') }}", transformData, function(error, data) {
 
 
-//data.forEach(function(d) {
- //       d.date = parseDate(d.date); // parsing the "date" column in the dataset
-  //      d['clinton'] = +d['clinton']; // parsing hillary's column
-   //     d['trump'] = +d['trump']; // parsing trump's column
-                              // to include more lines into your graph, you will need to parse more columns from your dataset
-//});
-
-data.forEach(function(d) { console.log(d); console.log(d.annotation); });
+data.forEach(function(d) { console.log(d); });
 
 // Define chart's dimensions and padding: this is where you change the chart's size (currently set to 600 x 270)
 var padding = {top: 30, right: 30, bottom: 30, left: 50};
 var w = 900 - padding.left - padding.right;
 var h = 400 - padding.top - padding.bottom;
-
 
 
 // setting x-scale based on time: no need to change anything here
@@ -104,6 +98,8 @@ var plotTeam = d3.svg.line()
 var playerColor = "#FFDF2A";
 var teamColor = "#FF5925";
 
+
+
 // drawing the lines
 svg.append("path")  
     .attr("stroke", playerColor)
@@ -129,8 +125,20 @@ document.getElementById("team").style.color = teamColor;
       .data(data)
       .enter()
       .append("circle")
-      .filter(function(d) { // filter function
-        return d.annotation == "1" // open candidates.csv and look at column "annotation". Only values with "1" gets selected to appear on chart.
+      .filter(function(d) {
+        // open csv and look at "annotation" columns. 
+        // only values that are not empty will be chosen and the reference will be passed down
+        // also, create a 'comment' field to reference the comment regardless of which entity it belongs to
+        if (d.playerAnnotation !== "") {
+          d.comment = d.playerAnnotation;
+          return true;
+        }
+        else if (d.teamAnnotation !== "") {
+          d.comment = d.teamAnnotation;
+          return true;
+        }
+        else
+          return false;
       })
       .attr("cx", function(d) {
         return xScale(d.date); 
@@ -156,9 +164,9 @@ document.getElementById("team").style.color = teamColor;
                 .duration(200)
                 .style("opacity", 1);
               
-              tooltip.html("trend: " + d.clinton + "<br> Hillary <br> Clinton")
-              .style("left", xScale(d.date) + -15 + "px")
-                .style("top", yScale(d.popularity) + -270 + "px");
+              tooltip.html(d.date.toString('yyyy-MM-dd') + ": " + d.comment)
+                     .style("left", xScale(d.date) + 20 + "px")
+                     .style("top", yScale(d.popularity) + -100 + "px");
 
           })
           .on("mouseout", function(d) {
