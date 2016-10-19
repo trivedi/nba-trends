@@ -2,9 +2,10 @@
 
 <head>
 <meta charset="utf-8">
-<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='graph.css') }}">
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/graph.css') }}">
 <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
 <script src="http://d3js.org/d3.v3.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
 <title>NBA Popularity Trends</title>
 </head>
 
@@ -28,17 +29,16 @@
             </div>
         </div>
         <div id="chart"></div>
-        <p>The success of a basketball team is dependent on the chemistry of the five players on the court. However, often times, an individual player is rewarded or blamed for the performance of his team. Regardless of whether they’re directly responsible for the numbers a team puts up, perceptions drive sports. Let’s compare global popularity trends of various players and the teams they played for.</p>
-        <p>Annotations are provided for milestones (e.g. draft, trade, major injury, major wins/losses, etc).</p>
-        <p>The data used comes from Google Trends.</p>
+        <div id="annotation-area"></div>
+        <p>The success of a basketball team is dependent on the chemistry of the five players on the court. However, often times, an individual player is rewarded or blamed for the performance of his team. Regardless of whether they’re directly responsible for the numbers a team puts up, perceptions drive sports. Using <a href="https://www.google.com/trends/explore?q=%2Fm%2F01jz6d,%2Fm%2F0jm7n">Google Trends</a>, we can compare global popularity trends of various players and the teams they played for.</p>
+        <p>The Y-axis shows how often a particular search-term is entered relative to the total search-volume across the United States.</p>
+        <p>Annotations are provided for various milestones (e.g. draft, trade, signing, major injury, major wins/losses).</p>
     </div>
-    <div id="box"></div>
 </body>
  
 <script>
 
-var parseDate = d3.time.format("%Y-%m-%d").parse; // no need to change anything here
-
+var parseDate = d3.time.format("%Y-%m-%d").parse;
 
 function transformData(d) {
     return {
@@ -54,7 +54,7 @@ function transformData(d) {
 d3.csv("{{ url_for('static', filename='data/lebronjames.csv') }}", transformData, function(error, data) {
 
 
-data.forEach(function(d) { console.log(d); });
+//data.forEach(function(d) { console.log(d); });
 
 // Define chart's dimensions and padding: this is where you change the chart's size (currently set to 600 x 270)
 var padding = {top: 30, right: 30, bottom: 30, left: 50};
@@ -97,19 +97,36 @@ var plotTeam = d3.svg.line()
  
 var playerColor = "#FFDF2A";
 var teamColor = "#FF5925";
-
+var formatDate = d3.time.format("%_m/%_d/%Y")
 
 
 // drawing the lines
-svg.append("path")  
+var playerPath = svg.append("path")  
     .attr("stroke", playerColor)
     .attr("d", plotPlayer(data));
 document.getElementById("player").style.color = playerColor;
 
+var len = playerPath.node().getTotalLength();
+
+playerPath.attr("stroke-dasharray", len + " " + len)
+    .attr("stroke-dashoffset", len)
+    .transition()
+    .duration(2000)
+    .ease("linear")
+    .attr("stroke-dashoffset", 0);
+
+
 svg.append("path")  
     .attr("stroke", teamColor)
-    .attr("d", plotTeam(data));
+    .attr("d", plotTeam(data))
+    .attr("stroke-dasharray", len + " " + len)
+    .attr("stroke-dashoffset", len)
+    .transition()
+    .duration(2000)
+    .ease("linear")
+    .attr("stroke-dashoffset", 0);
 document.getElementById("team").style.color = teamColor;
+
 
 // to add more lines, you will also need to append additional paths like this:
 // svg.append("path")
@@ -117,9 +134,9 @@ document.getElementById("team").style.color = teamColor;
 // .attr("d", _________(data));      <--- the blank field is the variable name that you created above
 
 // Annotation functionality
-    var tooltip = d3.select("#chart").append("div")
+    var tooltip = d3.select("#annotation-area").append("div")
         .attr("class", "tooltip")
-        .style("opacity", 0);
+        .style("opacity", 1);
 
     svg.selectAll("dots_c")
       .data(data)
@@ -131,10 +148,12 @@ document.getElementById("team").style.color = teamColor;
         // also, create a 'comment' field to reference the comment regardless of which entity it belongs to
         if (d.playerAnnotation !== "") {
           d.comment = d.playerAnnotation;
+          d.path = 'player';
           return true;
         }
         else if (d.teamAnnotation !== "") {
           d.comment = d.teamAnnotation;
+          d.path = 'team'
           return true;
         }
         else
@@ -151,29 +170,28 @@ document.getElementById("team").style.color = teamColor;
         return xScale(d.date);
       })
       .attr("cy", function(d) {
-        return yScale(d.player);
+        if (d.path == 'player')
+          return yScale(d.player);
+        else
+          return yScale(d.team);
       })
       .attr("r", function(d) {
         return 5; // size of annotation marker
       })
       .on("mouseover", function(d) {
-
         this.parentNode.appendChild(this);
 
-              tooltip.transition()
+        tooltip.transition()
                 .duration(200)
                 .style("opacity", 1);
               
-              tooltip.html(d.date.toString('yyyy-MM-dd') + ": " + d.comment)
-                     .style("left", xScale(d.date) + 20 + "px")
-                     .style("top", yScale(d.popularity) + -100 + "px");
-
-          })
-          .on("mouseout", function(d) {
-              tooltip.transition()
-               .duration(500)
-               .style("opacity", 0);
-          });
+        tooltip.html(formatDate(d.date) + ": " + d.comment);
+        })
+        .on("mouseout", function(d) {
+            tooltip.transition()
+           .duration(500)
+           .style("opacity", 0);
+        });
 
 // End of annotation functionality
 

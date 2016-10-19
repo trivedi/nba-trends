@@ -3,10 +3,19 @@ body {
     font-family: "Open Sans", "Helvetica Neue", Helvetica, sans-serif;
 }
 
+a {
+  color: #96B7CC;
+}
+
 p {
     color: #96B7CC;
     font-family: "Open Sans";
     width: 900px;
+}
+
+path { /* css styles for the lines on our graph */
+  stroke-width: 1.3;
+  fill: none;
 }
 
 select {
@@ -24,13 +33,8 @@ select {
     background-color: #fff;
 }
 
-path { /* css styles for the lines on our graph */
-  stroke-width: 1.3;
-  fill: none;
-}
-
 /* source: http://zurb.com/playground/radioactive-buttons */
-@-webkit-keyframes pulse {
+@-webkit-keyframes pulsate {
   from { 
     fill: #fff; -webkit-box-shadow: 0 0 9px #fff; 
     opacity: 0;
@@ -46,18 +50,21 @@ path { /* css styles for the lines on our graph */
 .annotation {
   border-style: solid;
   border-radius:50px;
-  -webkit-animation-name: pulse;
+  -webkit-animation-name: pulsate;
   -webkit-animation-duration: 4s;
+  -webkit-animation-delay: 2s;
   -webkit-animation-iteration-count: infinite;
+  opacity: 0;
 }
 
 .annotation:hover {
+    opacity: 1;
     r: 12px;
     fill: #4ecff4;
     -webkit-animation-duration: 0s; /* turn off blinking */
     -webkit-transition: r 1s;   /* time it takes to enlarge to size r */
 }
- 
+
 .axis path, /* css styles for the axis */
 .axis line {
     fill: none;
@@ -72,7 +79,7 @@ path { /* css styles for the lines on our graph */
 
 .container {
     height: 900px;
-    width: 60%;
+    width: 80%;
     margin: 150px;
     margin-top: 30px;
 }
@@ -87,18 +94,26 @@ path { /* css styles for the lines on our graph */
 
 .tooltip {
     position: relative;
-    width: 150px;
+    width: 200px;
     height: 20px;
     font-family: Helvetica;
     text-align: left;
-    color: white;
+    color: #96B7CC;
     pointer-events: none;
-    font-size: 12px;
+    font-size: 14px;
 }
  
+#annotation-area {
+  position: absolute;
+  height: 100%;
+  width: 200px;
+  top: 400px;
+  right: 100px;
+} 
+
 #chart {
     width: 700px;
-    height: 400;
+    height: 400px;
 }
 
 #graph-top {
